@@ -3,35 +3,53 @@ package Bd;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class Conexion {
 
-    private static final String URL =
-            "jdbc:sqlserver://localhost\\SQLEXPRESS;databaseName=BalanzaDB;encrypt=false";
-
-    private static final String USER = "balanza_user";
-    private static final String PASS = "balanza123";
-
     private static Connection instancia = null;
 
-    //----------------------------------
-    // SINGLETON: una sola conexión
-    //----------------------------------
+    private static String getUrl() {
+        String dir = System.getProperty("user.dir");
+        return "jdbc:sqlite:" + dir + "/BalanzaDB.db";
+    }
+
     public static Connection getInstancia() {
-        if (instancia == null) {
-            try {
-                instancia = DriverManager.getConnection(URL, USER, PASS);
-                System.out.println("Conexión establecida.");
-            } catch (SQLException e) {
-                System.err.println("Error al conectar: " + e.getMessage());
+        try {
+            if (instancia == null || instancia.isClosed()) {
+                instancia = DriverManager.getConnection(getUrl());
+                instancia.setAutoCommit(true);
+                crearTabla(instancia);
+                System.out.println("Conexión establecida: " + getUrl());
             }
+        } catch (SQLException e) {
+            System.err.println("Error al conectar: " + e.getMessage());
         }
         return instancia;
     }
 
-    //----------------------------------
-    // CERRAR CONEXIÓN
-    //----------------------------------
+    private static void crearTabla(Connection conn) {
+        String sql = """
+                CREATE TABLE IF NOT EXISTS Registros (
+                    Id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Fecha         TEXT,
+                    Nro_Cupon     INTEGER,
+                    Nro_Productor TEXT,
+                    Nombre        TEXT,
+                    Peso_Bruto    REAL,
+                    Tara          REAL,
+                    Descuento     REAL,
+                    Peso_Neto     REAL,
+                    Remito        INTEGER
+                )
+                """;
+        try (Statement st = conn.createStatement()) {
+            st.execute(sql);
+        } catch (SQLException e) {
+            System.err.println("Error al crear tabla: " + e.getMessage());
+        }
+    }
+
     public static void cerrar() {
         if (instancia != null) {
             try {
