@@ -89,7 +89,7 @@ public class Producto {
     public void setId(int id)                  { this.id = id; }
     public void setNroCupon(int nroCupon)      {
         this.nroCupon = nroCupon;
-        this.remito   = nroCupon;
+        this.remito   = 0;
     }
     public void setNroProductor(String v)      { this.nroProductor = v; }
     public void setNombre(String nombre)       { this.nombre = nombre; }
@@ -105,7 +105,7 @@ public class Producto {
         this.descuento = descuento;
         this.pesoNeto  = calcularPesoNeto();
     }
-
+    public void setRemito(int remito) { this.remito = remito; }
     //----------------------------------
     // TO STRING
     //----------------------------------

@@ -102,9 +102,7 @@ public class BalanzaUI extends JFrame {
 
         JTextField txtRemito = new JTextField();
         txtRemito.setBounds(20, 570, 250, 35);
-        txtRemito.setEditable(false);
-        txtRemito.setBackground(new Color(220, 220, 220));
-        txtRemito.setText(String.valueOf(contadorCupon[0]));
+
 
         // BOTÓN GUARDAR
         JButton btnGuardar = new JButton("Guardar");
@@ -117,6 +115,11 @@ public class BalanzaUI extends JFrame {
         // BOTÓN SALIR
         JButton btnSalir = new JButton("Salir");
         btnSalir.setBounds(320, 640, 100, 40);
+
+        //BOTÓN ACTUAIZAR
+        JButton btnModificar = new JButton("Modificar");
+        btnModificar.setBounds(320, 640, 120, 40);
+        panelFormulario.add(btnModificar);
 
         panelFormulario.add(lblFecha);
         panelFormulario.add(txtFecha);
@@ -137,6 +140,8 @@ public class BalanzaUI extends JFrame {
         panelFormulario.add(btnGuardar);
         panelFormulario.add(btnVerProductores);
         panelFormulario.add(btnSalir);
+
+
 
         //----------------------------------
         // PANEL DERECHO
@@ -176,6 +181,24 @@ public class BalanzaUI extends JFrame {
             }
             if (txtTara.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "La Tara no puede estar vacía.");
+                return;
+            }
+
+            ///REMITO
+            if (txtRemito.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "El Remito no puede estar vacío.");
+                return;
+            }
+            if (!txtRemito.getText().trim().matches("\\d+")) {
+                JOptionPane.showMessageDialog(this, "El Remito solo puede contener números.");
+                return;
+            }
+            if (Integer.parseInt(txtRemito.getText().trim()) <= 0) {
+                JOptionPane.showMessageDialog(this, "El Remito debe ser mayor a 0.");
+                return;
+            }
+            if (RegistroDAO.remitoExiste(Integer.parseInt(txtRemito.getText().trim()))) {
+                JOptionPane.showMessageDialog(this, "Ya existe un registro con ese número de Remito.");
                 return;
             }
 
@@ -235,7 +258,7 @@ public class BalanzaUI extends JFrame {
 
                 contadorCupon[0]++;
                 txtCupon.setText(String.valueOf(contadorCupon[0]));
-                txtRemito.setText(String.valueOf(contadorCupon[0]));
+                txtRemito.setText("");
                 txtFecha.setText(java.time.LocalDate.now().toString());
 
                 txtNroProductor.setText("");
@@ -253,7 +276,8 @@ public class BalanzaUI extends JFrame {
         // EVENTO VER PRODUCTORES
         //----------------------------------
         btnVerProductores.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Próximamente disponible.");
+            VerProductoresUI ventana = new VerProductoresUI();
+            ventana.setVisible(true);
         });
         //----------------------------------
         // EVENTO SALIR
@@ -269,6 +293,11 @@ public class BalanzaUI extends JFrame {
                 Conexion.cerrar();
                 System.exit(0);
             }
+        });
+
+        btnModificar.addActionListener(e -> {
+            ActualizarUI ventanaActualizar = new ActualizarUI();
+            ventanaActualizar.setVisible(true);
         });
 
         add(panelFormulario);
