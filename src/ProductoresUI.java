@@ -53,6 +53,7 @@ public class ProductoresUI extends JFrame {
         headerPanel.add(lblMes, BorderLayout.EAST);
 
         add(headerPanel, BorderLayout.NORTH);
+        setIconImage(BalanzaUI.iconoApp(32));
 
         // ── Tabla ────────────────────────────────────────
         String[] columnas = {"N°", "Nombre", "Teléfono", "Dirección", "Kg del Mes"};
