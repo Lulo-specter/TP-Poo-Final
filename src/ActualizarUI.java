@@ -6,118 +6,115 @@ import java.awt.*;
 
 public class ActualizarUI extends JFrame {
 
+    // Colores yerba mate
+    private static final Color VERDE_OSCURO = new Color(26,  77,  46);
+    private static final Color VERDE_MEDIO  = new Color(79,  119, 45);
+    private static final Color NARANJA      = new Color(196, 98,  31);
+    private static final Color BEIGE        = new Color(245, 241, 232);
+    private static final Color VERDE_CLARO  = new Color(232, 245, 224);
+    private static final Color BORDE_CAMPO  = new Color(150, 190, 100);
+    private static final Color TEXTO_OSCURO = new Color(40,  40,  40);
+
     public ActualizarUI() {
 
-        setTitle("Actualizar Registro");
-        setSize(400, 800);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE); // cierra solo esta ventana, no todo el programa
+        setTitle("Modificar Registro — Balanza");
+        setSize(420, 820);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(null);
         setResizable(false);
+        getContentPane().setBackground(BEIGE);
 
-        //----------------------------------
-        // CAMPOS
-        JLabel lblBuscar = new JLabel("Nro Cupón a buscar:");
-        lblBuscar.setBounds(20, 20, 200, 25);
+        // ── Título ──────────────────────────────────────
+        JLabel lblTitulo = crearLabel("Modificar Registro");
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblTitulo.setForeground(VERDE_OSCURO);
+        lblTitulo.setBounds(20, 14, 350, 28);
+        add(lblTitulo);
 
-        JTextField txtBuscar = new JTextField();
-        txtBuscar.setBounds(20, 45, 200, 35);
+        JSeparator sep = new JSeparator();
+        sep.setBounds(20, 46, 360, 2);
+        sep.setForeground(VERDE_MEDIO);
+        add(sep);
 
-        JButton btnBuscar = new JButton("Buscar");
-        btnBuscar.setBounds(230, 45, 100, 35);
-
-        JSeparator separador = new JSeparator();
-        separador.setBounds(20, 100, 340, 10);
-
-        JLabel lblCupon = new JLabel("Nro Cupón");
-        lblCupon.setBounds(20, 110, 200, 25);
-
-        JTextField txtCupon = new JTextField();
-        txtCupon.setBounds(20, 130, 250, 35);
-        txtCupon.setEditable(false);
-        txtCupon.setBackground(new Color(220, 220, 220));
-
-        JLabel lblFecha = new JLabel("Fecha");
-        lblFecha.setBounds(20, 175, 200, 25);
-
-        JTextField txtFecha = new JTextField();
-        txtFecha.setBounds(20, 195, 250, 35);
-
-        JLabel lblNroProductor = new JLabel("Nro Productor");
-        lblNroProductor.setBounds(20, 240, 200, 25);
-
-        JTextField txtNroProductor = new JTextField();
-        txtNroProductor.setBounds(20, 260, 250, 35);
-
-        JLabel lblNombre = new JLabel("Nombre");
-        lblNombre.setBounds(20, 305, 200, 25);
-
-        JTextField txtNombre = new JTextField();
-        txtNombre.setBounds(20, 325, 250, 35);
-
-        JLabel lblBruto = new JLabel("Peso Bruto");
-        lblBruto.setBounds(20, 370, 200, 25);
-
-        JTextField txtBruto = new JTextField();
-        txtBruto.setBounds(20, 390, 250, 35);
-
-        JLabel lblTara = new JLabel("Tara");
-        lblTara.setBounds(20, 435, 200, 25);
-
-        JTextField txtTara = new JTextField();
-        txtTara.setBounds(20, 455, 250, 35);
-
-        JLabel lblDescuento = new JLabel("Descuento (%)");
-        lblDescuento.setBounds(20, 500, 200, 25);
-
-        JTextField txtDescuento = new JTextField();
-        txtDescuento.setBounds(20, 520, 250, 35);
-
-        JLabel lblRemito = new JLabel("Remito");
-        lblRemito.setBounds(20, 565, 200, 25);
-
-        JTextField txtRemito = new JTextField();
-        txtRemito.setBounds(20, 585, 250, 35);
-
-        JButton btnActualizar = new JButton("Modificar");
-        btnActualizar.setBounds(20, 700, 140, 40);
-
-        JButton btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBounds(175, 700, 140, 40);
-        //----------------------------------
-        // AGREGAR COMPONENTES
-        //----------------------------------
+        // ── Búsqueda ────────────────────────────────────
+        JLabel lblBuscar = crearLabel("Nro Cupón a buscar:");
+        lblBuscar.setBounds(20, 58, 220, 20);
         add(lblBuscar);
+
+        JTextField txtBuscar = crearCampo();
+        txtBuscar.setBounds(20, 80, 220, 30);
         add(txtBuscar);
+
+        JButton btnBuscar = crearBoton("Buscar", VERDE_OSCURO, Color.WHITE);
+        btnBuscar.setBounds(252, 80, 110, 30);
         add(btnBuscar);
-        add(separador);
-        add(lblCupon);
-        add(txtCupon);
-        add(lblNroProductor);
-        add(txtNroProductor);
-        add(lblNombre);
-        add(txtNombre);
-        add(lblBruto);
-        add(txtBruto);
-        add(lblTara);
-        add(txtTara);
-        add(lblDescuento);
-        add(txtDescuento);
+
+        JSeparator sep2 = new JSeparator();
+        sep2.setBounds(20, 124, 360, 2);
+        sep2.setForeground(new Color(200, 210, 190));
+        add(sep2);
+
+        // ── Campos del registro ─────────────────────────
+        int y = 134;
+
+        JLabel lblCupon = crearLabel("Nro Cupón");
+        lblCupon.setBounds(20, y, 220, 20); add(lblCupon);
+        JTextField txtCupon = crearCampo();
+        txtCupon.setBounds(20, y + 23, 360, 30);
+        txtCupon.setEditable(false);
+        txtCupon.setBackground(VERDE_CLARO);
+        add(txtCupon); y += 68;
+
+        JLabel lblFecha = crearLabel("Fecha");
+        lblFecha.setBounds(20, y, 220, 20); add(lblFecha);
+        JTextField txtFecha = crearCampo();
+        txtFecha.setBounds(20, y + 23, 360, 30); add(txtFecha); y += 68;
+
+        JLabel lblNroProductor = crearLabel("Nro Productor");
+        lblNroProductor.setBounds(20, y, 220, 20); add(lblNroProductor);
+        JTextField txtNroProductor = crearCampo();
+        txtNroProductor.setBounds(20, y + 23, 360, 30); add(txtNroProductor); y += 68;
+
+        JLabel lblNombre = crearLabel("Nombre");
+        lblNombre.setBounds(20, y, 220, 20); add(lblNombre);
+        JTextField txtNombre = crearCampo();
+        txtNombre.setBounds(20, y + 23, 360, 30); add(txtNombre); y += 68;
+
+        JLabel lblBruto = crearLabel("Peso Bruto (kg)");
+        lblBruto.setBounds(20, y, 220, 20); add(lblBruto);
+        JTextField txtBruto = crearCampo();
+        txtBruto.setBounds(20, y + 23, 360, 30); add(txtBruto); y += 68;
+
+        JLabel lblTara = crearLabel("Tara (kg)");
+        lblTara.setBounds(20, y, 220, 20); add(lblTara);
+        JTextField txtTara = crearCampo();
+        txtTara.setBounds(20, y + 23, 360, 30); add(txtTara); y += 68;
+
+        JLabel lblDescuento = crearLabel("Descuento (%)");
+        lblDescuento.setBounds(20, y, 220, 20); add(lblDescuento);
+        JTextField txtDescuento = crearCampo();
+        txtDescuento.setBounds(20, y + 23, 360, 30); add(txtDescuento); y += 68;
+
+        JLabel lblRemito = crearLabel("Remito");
+        lblRemito.setBounds(20, y, 220, 20); add(lblRemito);
+        JTextField txtRemito = crearCampo();
+        txtRemito.setBounds(20, y + 23, 360, 30); add(txtRemito); y += 80;
+
+        // ── Botones ─────────────────────────────────────
+        JButton btnActualizar = crearBoton("Modificar", VERDE_MEDIO, Color.WHITE);
+        JButton btnCancelar   = crearBoton("Cancelar",  NARANJA,     Color.WHITE);
+        btnActualizar.setBounds(20,  y, 170, 40);
+        btnCancelar.setBounds(200,   y, 170, 40);
         add(btnActualizar);
         add(btnCancelar);
-        add(lblRemito);
-        add(txtRemito);
-        add(lblFecha);
-        add(txtFecha);
 
-        //----------------------------------
-        // EVENTO BUSCAR
-        //----------------------------------
+        // Deshabilitar hasta buscar
+        btnActualizar.setEnabled(false);
+
+        // ── EVENTO BUSCAR ────────────────────────────────
         btnBuscar.addActionListener(e -> {
-
             String textoCupon = txtBuscar.getText().trim();
-
-
             if (textoCupon.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Ingresá un Nro de Cupón para buscar.");
                 return;
@@ -127,17 +124,15 @@ public class ActualizarUI extends JFrame {
                 return;
             }
 
-            int cupon = Integer.parseInt(textoCupon);
-            Producto p = RegistroDAO.buscarPorCupon(cupon);
-
+            Producto p = RegistroDAO.buscarPorCupon(Integer.parseInt(textoCupon));
             if (p == null) {
                 JOptionPane.showMessageDialog(this, "No se encontró ningún registro con ese Nro de Cupón.");
                 btnActualizar.setEnabled(false);
                 return;
             }
 
-            // Cargar los datos en los campos
             txtCupon.setText(String.valueOf(p.getNroCupon()));
+            txtFecha.setText(p.getFecha());
             txtNroProductor.setText(p.getNroProductor());
             txtNombre.setText(p.getNombre());
             txtBruto.setText(String.valueOf(p.getPesoBruto()));
@@ -145,34 +140,24 @@ public class ActualizarUI extends JFrame {
             txtDescuento.setText(String.valueOf(p.getDescuento()));
             txtRemito.setText(String.valueOf(p.getRemito()));
             btnActualizar.setEnabled(true);
-            txtFecha.setText(p.getFecha());
         });
 
-        //----------------------------------
-        // EVENTO ACTUALIZAR
-        //----------------------------------
+        // ── EVENTO ACTUALIZAR ─────────────────────────────
         btnActualizar.addActionListener(e -> {
-
-            // Validaciones (igual que en BalanzaUI)
             if (txtNroProductor.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "El Nro Productor no puede estar vacío.");
-                return;
+                JOptionPane.showMessageDialog(this, "El Nro Productor no puede estar vacío."); return;
             }
             if (!txtNroProductor.getText().trim().matches("\\d+")) {
-                JOptionPane.showMessageDialog(this, "El Nro Productor solo puede contener números.");
-                return;
+                JOptionPane.showMessageDialog(this, "El Nro Productor solo puede contener números."); return;
             }
             if (txtNombre.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "El Nombre no puede estar vacío.");
-                return;
+                JOptionPane.showMessageDialog(this, "El Nombre no puede estar vacío."); return;
             }
             if (!txtNombre.getText().trim().matches("[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+")) {
-                JOptionPane.showMessageDialog(this, "El Nombre solo puede contener letras.");
-                return;
+                JOptionPane.showMessageDialog(this, "El Nombre solo puede contener letras."); return;
             }
             if (txtBruto.getText().trim().isEmpty() || txtTara.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Peso Bruto y Tara no pueden estar vacíos.");
-                return;
+                JOptionPane.showMessageDialog(this, "Peso Bruto y Tara no pueden estar vacíos."); return;
             }
 
             try {
@@ -180,64 +165,70 @@ public class ActualizarUI extends JFrame {
                 double tara      = Double.parseDouble(txtTara.getText().replace(",", "."));
                 double descuento = Double.parseDouble(txtDescuento.getText().replace(",", "."));
 
-                if (bruto <= 0) {
-                    JOptionPane.showMessageDialog(this, "El Peso Bruto debe ser mayor a 0.");
-                    return;
-                }
-                if (tara < 0) {
-                    JOptionPane.showMessageDialog(this, "La Tara no puede ser negativa.");
-                    return;
-                }
-                if (tara >= bruto) {
-                    JOptionPane.showMessageDialog(this, "La Tara no puede ser mayor o igual al Peso Bruto.");
-                    return;
-                }
-                if (descuento < 0 || descuento > 100) {
-                    JOptionPane.showMessageDialog(this, "El Descuento debe estar entre 0 y 100.");
-                    return;
-                }
+                if (bruto <= 0) { JOptionPane.showMessageDialog(this, "El Peso Bruto debe ser mayor a 0."); return; }
+                if (tara < 0)   { JOptionPane.showMessageDialog(this, "La Tara no puede ser negativa."); return; }
+                if (tara >= bruto) { JOptionPane.showMessageDialog(this, "La Tara no puede ser mayor o igual al Peso Bruto."); return; }
+                if (descuento < 0 || descuento > 100) { JOptionPane.showMessageDialog(this, "El Descuento debe estar entre 0 y 100."); return; }
 
-                if (txtRemito.getText().trim().isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "El Remito no puede estar vacío.");
-                    return;
+                if (txtRemito.getText().trim().isEmpty() || !txtRemito.getText().trim().matches("\\d+")
+                        || Integer.parseInt(txtRemito.getText().trim()) <= 0) {
+                    JOptionPane.showMessageDialog(this, "El Remito debe ser un número mayor a 0."); return;
                 }
-                if (!txtRemito.getText().trim().matches("\\d+")) {
-                    JOptionPane.showMessageDialog(this, "El Remito solo puede contener números.");
-                    return;
-                }
-                if (Integer.parseInt(txtRemito.getText().trim()) <= 0) {
-                    JOptionPane.showMessageDialog(this, "El Remito debe ser mayor a 0.");
-                    return;
-                }
-
-                int cupon = Integer.parseInt(txtCupon.getText());
 
                 boolean exito = RegistroDAO.actualizar(
-                        cupon,
+                        Integer.parseInt(txtCupon.getText()),
                         txtNroProductor.getText().trim(),
                         txtNombre.getText().trim(),
-                        bruto,
-                        tara,
-                        descuento,
+                        bruto, tara, descuento,
                         Integer.parseInt(txtRemito.getText().trim()),
                         txtFecha.getText().trim()
                 );
 
                 if (exito) {
                     JOptionPane.showMessageDialog(this, "Registro actualizado correctamente.");
-                    dispose(); // cierra la ventana
+                    dispose();
                 } else {
                     JOptionPane.showMessageDialog(this, "No se pudo actualizar el registro.");
                 }
 
-            } catch (Exception ex) {
+            } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Peso Bruto, Tara y Descuento deben ser números.");
             }
         });
 
-        //----------------------------------
-        // EVENTO CANCELAR
-        //----------------------------------
+        // ── EVENTO CANCELAR ──────────────────────────────
         btnCancelar.addActionListener(e -> dispose());
+    }
+
+    // ── Helpers de estilo ────────────────────────────────
+    private JLabel crearLabel(String texto) {
+        JLabel lbl = new JLabel(texto);
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lbl.setForeground(VERDE_OSCURO);
+        return lbl;
+    }
+
+    private JTextField crearCampo() {
+        JTextField tf = new JTextField();
+        tf.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        tf.setForeground(TEXTO_OSCURO);
+        tf.setBackground(Color.WHITE);
+        tf.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDE_CAMPO, 1),
+                BorderFactory.createEmptyBorder(3, 8, 3, 8)
+        ));
+        return tf;
+    }
+
+    private JButton crearBoton(String texto, Color bg, Color fg) {
+        JButton btn = new JButton(texto);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btn.setBackground(bg);
+        btn.setForeground(fg);
+        btn.setOpaque(true);
+        btn.setBorderPainted(false);
+        btn.setFocusPainted(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return btn;
     }
 }

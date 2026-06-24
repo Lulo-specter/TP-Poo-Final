@@ -29,7 +29,7 @@ public class Conexion {
     }
 
     private static void crearTabla(Connection conn) {
-        String sql = """
+        String sqlRegistros = """
                 CREATE TABLE IF NOT EXISTS Registros (
                     Id            INTEGER PRIMARY KEY AUTOINCREMENT,
                     Fecha         TEXT,
@@ -43,10 +43,22 @@ public class Conexion {
                     Remito        INTEGER
                 )
                 """;
+        String sqlProductores = """
+                CREATE TABLE IF NOT EXISTS Productores (
+                    Id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Nombre    TEXT,
+                    Telefono  TEXT,
+                    Direccion TEXT
+                )
+                """;
         try (Statement st = conn.createStatement()) {
-            st.execute(sql);
+            st.execute(sqlRegistros);
+            st.execute(sqlProductores);
+            // Migración: agrega columnas si la tabla ya existía sin ellas
+            try { st.execute("ALTER TABLE Productores ADD COLUMN Telefono  TEXT DEFAULT ''"); } catch (SQLException ignored) {}
+            try { st.execute("ALTER TABLE Productores ADD COLUMN Direccion TEXT DEFAULT ''"); } catch (SQLException ignored) {}
         } catch (SQLException e) {
-            System.err.println("Error al crear tabla: " + e.getMessage());
+            System.err.println("Error al crear tablas: " + e.getMessage());
         }
     }
 

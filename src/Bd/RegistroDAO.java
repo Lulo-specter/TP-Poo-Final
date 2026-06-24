@@ -175,6 +175,20 @@ public class RegistroDAO {
         return 0;
     }
     //----------------------------------
+    // DELETE
+    //----------------------------------
+    public static boolean eliminar(int id) {
+        String sql = "DELETE FROM Registros WHERE Id = ?";
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar registro: " + e.getMessage());
+            return false;
+        }
+    }
+
+    //----------------------------------
     // VERIFICAR SI REMITO YA EXISTE
     //----------------------------------
     public static boolean remitoExiste(int remito) {
