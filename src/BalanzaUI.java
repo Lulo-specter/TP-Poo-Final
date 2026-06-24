@@ -70,14 +70,29 @@ public class BalanzaUI extends JFrame {
         left.setBackground(BEIGE);
 
         // ── Cabecera (se estira automáticamente con BorderLayout.NORTH) ─
-        JPanel cabecera = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 11));
+        JPanel cabecera = new JPanel(new BorderLayout());
         cabecera.setBackground(VERDE_OSCURO);
+
         JLabel lblTitulo = new JLabel("Balanza — Yerbatera C&M");
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 17));
         lblTitulo.setForeground(Color.WHITE);
         lblTitulo.setIcon(new ImageIcon(iconoApp(24)));
         lblTitulo.setIconTextGap(10);
-        cabecera.add(lblTitulo);
+        lblTitulo.setBorder(BorderFactory.createEmptyBorder(11, 16, 11, 0));
+
+        ImageIcon iconoUsuario = new ImageIcon(mkImg(18, 18, g -> {
+            g.setColor(Color.WHITE);
+            g.fillOval(5, 1, 8, 8);
+            g.fillArc(1, 10, 16, 13, 0, 180);
+        }));
+        JLabel lblAdmin = new JLabel("Administración", iconoUsuario, JLabel.LEFT);
+        lblAdmin.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        lblAdmin.setForeground(Color.WHITE);
+        lblAdmin.setIconTextGap(8);
+        lblAdmin.setBorder(BorderFactory.createEmptyBorder(11, 0, 11, 16));
+
+        cabecera.add(lblTitulo, BorderLayout.WEST);
+        cabecera.add(lblAdmin, BorderLayout.EAST);
         left.add(cabecera, BorderLayout.NORTH);
 
         // Panel de formulario con null layout dentro del centro

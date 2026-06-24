@@ -55,6 +55,8 @@ public class VerProductoresUI extends JFrame {
         JScrollPane scroll = new JScrollPane(tabla);
         scroll.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         add(scroll, BorderLayout.CENTER);
+
+
         //----------------------------------
         // CARGAR DATOS
         //----------------------------------
