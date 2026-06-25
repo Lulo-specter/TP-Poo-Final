@@ -1,5 +1,5 @@
 import Bd.RegistroDAO;
-import Models.Producto;
+import Models.Registro;
 
 import javax.swing.*;
 import java.awt.*;
@@ -124,7 +124,7 @@ public class ActualizarUI extends JFrame {
                 return;
             }
 
-            Producto p = RegistroDAO.buscarPorCupon(Integer.parseInt(textoCupon));
+            Registro p = RegistroDAO.buscarPorCupon(Integer.parseInt(textoCupon));
             if (p == null) {
                 JOptionPane.showMessageDialog(this, "No se encontró ningún registro con ese Nro de Cupón.");
                 btnActualizar.setEnabled(false);
@@ -175,9 +175,11 @@ public class ActualizarUI extends JFrame {
                     JOptionPane.showMessageDialog(this, "El Remito debe ser un número mayor a 0."); return;
                 }
 
+                String nroProdStr = txtNroProductor.getText().trim();
+                Integer nroProd = nroProdStr.isEmpty() ? null : Integer.parseInt(nroProdStr);
                 boolean exito = RegistroDAO.actualizar(
                         Integer.parseInt(txtCupon.getText()),
-                        txtNroProductor.getText().trim(),
+                        nroProd,
                         txtNombre.getText().trim(),
                         bruto, tara, descuento,
                         Integer.parseInt(txtRemito.getText().trim()),

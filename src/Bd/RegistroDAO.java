@@ -1,6 +1,6 @@
 package Bd;
 
-import Models.Producto;
+import Models.Registro;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ public class RegistroDAO {
     public static void insertar(
             String fecha,
             int nroCupon,
-            String nroProductor,
+            Integer nroProductor,
             String nombre,
             double pesoBruto,
             double tara,
@@ -29,7 +29,9 @@ public class RegistroDAO {
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setString(1, fecha);
             ps.setInt(2, nroCupon);
-            ps.setString(3, nroProductor);
+            // NULL si el productor no está registrado en el sistema
+            if (nroProductor != null) ps.setInt(3, nroProductor);
+            else                      ps.setNull(3, Types.INTEGER);
             ps.setString(4, nombre);
             ps.setDouble(5, pesoBruto);
             ps.setDouble(6, tara);
@@ -50,7 +52,7 @@ public class RegistroDAO {
 //----------------------------------
     public static boolean actualizar(
             int nroCupon,
-            String nroProductor,
+            Integer nroProductor,
             String nombre,
             double pesoBruto,
             double tara,
@@ -74,7 +76,8 @@ public class RegistroDAO {
                 "WHERE Nro_Cupon = ?";
 
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
-            ps.setString(1, nroProductor);
+            if (nroProductor != null) ps.setInt(1, nroProductor);
+            else                      ps.setNull(1, Types.INTEGER);
             ps.setString(2, nombre);
             ps.setDouble(3, pesoBruto);
             ps.setDouble(4, tara);
@@ -96,7 +99,7 @@ public class RegistroDAO {
     //----------------------------------
     // BUSCAR POR CUPON (para cargar datos en el formulario)
     //----------------------------------
-    public static Producto buscarPorCupon(int nroCupon) {
+    public static Registro buscarPorCupon(int nroCupon) {
         String sql = "SELECT * FROM Registros WHERE Nro_Cupon = ?";
 
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
@@ -104,10 +107,12 @@ public class RegistroDAO {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                Producto p = new Producto(
+                Object nroProdObj = rs.getObject("Nro_Productor");
+                String nroProdStr = nroProdObj != null ? String.valueOf(((Number) nroProdObj).intValue()) : "";
+                Registro p = new Registro(
                         rs.getInt("Id"),
                         rs.getInt("Nro_Cupon"),
-                        rs.getString("Nro_Productor"),
+                        nroProdStr,
                         rs.getString("Nombre"),
                         rs.getDouble("Peso_Bruto"),
                         rs.getDouble("Tara"),
@@ -128,8 +133,8 @@ public class RegistroDAO {
     //----------------------------------
     // SELECT ALL
     //----------------------------------
-    public static List<Producto> listar() {
-        List<Producto> lista = new ArrayList<>();
+    public static List<Registro> listar() {
+        List<Registro> lista = new ArrayList<>();
         String sql = "SELECT * FROM Registros";
 
         try (
@@ -137,10 +142,12 @@ public class RegistroDAO {
                 ResultSet rs = ps.executeQuery()
         ) {
             while (rs.next()) {
-                Producto p = new Producto(
+                Object nroProdObj = rs.getObject("Nro_Productor");
+                String nroProdStr = nroProdObj != null ? String.valueOf(((Number) nroProdObj).intValue()) : "";
+                Registro p = new Registro(
                         rs.getInt("Id"),
                         rs.getInt("Nro_Cupon"),
-                        rs.getString("Nro_Productor"),
+                        nroProdStr,
                         rs.getString("Nombre"),
                         rs.getDouble("Peso_Bruto"),
                         rs.getDouble("Tara"),

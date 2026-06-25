@@ -1,6 +1,6 @@
 package Models;
 
-public class Producto {
+public class Registro {
 
     private int id;
     private int nroCupon;
@@ -12,10 +12,11 @@ public class Producto {
     private double pesoNeto;
     private int remito;
     private String fecha;
+
     //----------------------------------
     // CONSTRUCTOR COMPLETO (desde BD)
     //----------------------------------
-    public Producto(
+    public Registro(
             int id,
             int nroCupon,
             String nroProductor,
@@ -40,7 +41,7 @@ public class Producto {
     //----------------------------------
     // CONSTRUCTOR SIN ID (nuevo registro)
     //----------------------------------
-    public Producto(
+    public Registro(
             int nroCupon,
             String nroProductor,
             String nombre,
@@ -56,7 +57,7 @@ public class Producto {
                 pesoBruto,
                 tara,
                 descuento,
-                java.time.LocalDate.now().toString() // fecha se pasa acá
+                java.time.LocalDate.now().toString()
         );
     }
 
@@ -72,40 +73,29 @@ public class Producto {
     //----------------------------------
     // GETTERS
     //----------------------------------
-    public int getId()              { return id; }
-    public int getNroCupon()        { return nroCupon; }
-    public String getNroProductor() { return nroProductor; }
-    public String getNombre()       { return nombre; }
-    public double getPesoBruto()    { return pesoBruto; }
-    public double getTara()         { return tara; }
-    public double getDescuento()    { return descuento; }
-    public double getPesoNeto()     { return pesoNeto; }
-    public int getRemito()          { return remito; }
-    public String getFecha() { return fecha; }
+    public int    getId()              { return id; }
+    public int    getNroCupon()        { return nroCupon; }
+    public String getNroProductor()    { return nroProductor; }
+    public String getNombre()          { return nombre; }
+    public double getPesoBruto()       { return pesoBruto; }
+    public double getTara()            { return tara; }
+    public double getDescuento()       { return descuento; }
+    public double getPesoNeto()        { return pesoNeto; }
+    public int    getRemito()          { return remito; }
+    public String getFecha()           { return fecha; }
 
     //----------------------------------
     // SETTERS
     //----------------------------------
     public void setId(int id)                  { this.id = id; }
-    public void setNroCupon(int nroCupon)      {
-        this.nroCupon = nroCupon;
-        this.remito   = 0;
-    }
+    public void setNroCupon(int nroCupon)      { this.nroCupon = nroCupon; this.remito = 0; }
     public void setNroProductor(String v)      { this.nroProductor = v; }
     public void setNombre(String nombre)       { this.nombre = nombre; }
-    public void setPesoBruto(double pesoBruto) {
-        this.pesoBruto = pesoBruto;
-        this.pesoNeto  = calcularPesoNeto();
-    }
-    public void setTara(double tara)           {
-        this.tara     = tara;
-        this.pesoNeto = calcularPesoNeto();
-    }
-    public void setDescuento(double descuento) {
-        this.descuento = descuento;
-        this.pesoNeto  = calcularPesoNeto();
-    }
-    public void setRemito(int remito) { this.remito = remito; }
+    public void setPesoBruto(double pesoBruto) { this.pesoBruto = pesoBruto; this.pesoNeto = calcularPesoNeto(); }
+    public void setTara(double tara)           { this.tara = tara; this.pesoNeto = calcularPesoNeto(); }
+    public void setDescuento(double descuento) { this.descuento = descuento; this.pesoNeto = calcularPesoNeto(); }
+    public void setRemito(int remito)          { this.remito = remito; }
+
     //----------------------------------
     // TO STRING
     //----------------------------------

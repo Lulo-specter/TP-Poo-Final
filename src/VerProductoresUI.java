@@ -1,5 +1,5 @@
 import Bd.RegistroDAO;
-import Models.Producto;
+import Models.Registro;
 import java.sql.SQLException;
 import Bd.Conexion;
 
@@ -60,9 +60,9 @@ public class VerProductoresUI extends JFrame {
         //----------------------------------
         // CARGAR DATOS
         //----------------------------------
-        List<Producto> lista = RegistroDAO.listar();
+        List<Registro> lista = RegistroDAO.listar();
         double totalDiario = 0;
-        for (Producto p : lista) {
+        for (Registro p : lista) {
             modelo.addRow(new Object[]{
                     p.getId(),
                     p.getFecha(),

@@ -9,7 +9,7 @@ public class Conexion {
 
     private static Connection instancia = null;
 
-    private static String getUrl() {
+    private static String getRutaDB() {
         String dir = System.getProperty("user.dir");
         return "jdbc:sqlite:" + dir + "/BalanzaDB.db";
     }
@@ -17,10 +17,14 @@ public class Conexion {
     public static Connection getInstancia() {
         try {
             if (instancia == null || instancia.isClosed()) {
-                instancia = DriverManager.getConnection(getUrl());
+                instancia = DriverManager.getConnection(getRutaDB());
                 instancia.setAutoCommit(true);
+                // Habilitar soporte de claves foráneas en SQLite (desactivado por defecto)
+                try (Statement pragma = instancia.createStatement()) {
+                    pragma.execute("PRAGMA foreign_keys = ON");
+                }
                 crearTabla(instancia);
-                System.out.println("Conexión establecida: " + getUrl());
+                System.out.println("Conexión establecida: " + getRutaDB());
             }
         } catch (SQLException e) {
             System.err.println("Error al conectar: " + e.getMessage());
@@ -34,13 +38,14 @@ public class Conexion {
                     Id            INTEGER PRIMARY KEY AUTOINCREMENT,
                     Fecha         TEXT,
                     Nro_Cupon     INTEGER,
-                    Nro_Productor TEXT,
+                    Nro_Productor INTEGER,
                     Nombre        TEXT,
                     Peso_Bruto    REAL,
                     Tara          REAL,
                     Descuento     REAL,
                     Peso_Neto     REAL,
-                    Remito        INTEGER
+                    Remito        INTEGER,
+                    FOREIGN KEY (Nro_Productor) REFERENCES Productores(Id)
                 )
                 """;
         String sqlProductores = """
