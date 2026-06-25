@@ -1,7 +1,7 @@
 import Bd.Conexion;
 import Bd.ProductorDAO;
 import Bd.RegistroDAO;
-import Models.Producto;
+import Models.Registro;
 import Models.Productor;
 
 import javax.swing.*;
@@ -32,11 +32,11 @@ public class BalanzaUI extends JFrame {
     // ── Estado tabla ─────────────────────────────────────
     private DefaultTableModel    tableModel;
     private JTable               tabla;
-    private final List<Producto> registrosActuales = new ArrayList<>();
+    private final List<Registro> registrosActuales = new ArrayList<>();
 
     // ── Combo productores ────────────────────────────────
     private JComboBox<String>        cmbNombre;
-    private String                   selectedProductorNro = ""; // Id del productor seleccionado (vacío si no está registrado)
+    private Integer                  selectedProductorNro = null; // Id del productor seleccionado (null si no está registrado)
     private final Map<String,String> mapaProductores = new HashMap<>();
 
     // ── Cálculo en tiempo real ───────────────────────────
@@ -55,10 +55,10 @@ public class BalanzaUI extends JFrame {
 
         setTitle("Yerbatera C&M — Sistema de Balanza");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);   // ocupa toda la pantalla
-        setMinimumSize(new Dimension(1100, 600));
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setMinimumSize(new Dimension(900, 560));
         setIconImage(iconoApp(32));
-        setLayout(new GridLayout(1, 2, 6, 0));
+        setLayout(new BorderLayout());
         getContentPane().setBackground(BEIGE);
 
         final int[] contadorCupon = {RegistroDAO.getUltimoCupon() + 1};
@@ -98,58 +98,52 @@ public class BalanzaUI extends JFrame {
         // Panel de formulario con null layout dentro del centro
         JPanel form = new JPanel(null);
         form.setBackground(BEIGE);
-        left.add(form, BorderLayout.CENTER);
+        JScrollPane formScroll = new JScrollPane(form,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        formScroll.setBorder(BorderFactory.createEmptyBorder());
+        formScroll.getVerticalScrollBar().setUnitIncrement(16);
+        left.add(formScroll, BorderLayout.CENTER);
 
         // Alias para no cambiar todas las llamadas left.add → form.add
         final JPanel lp = form;
 
-        // ── Campos en cuadrícula 2×4 ────────────────────
-        int y = 12;   // primera fila dentro de form
+        // ── Labels (referencias para layout responsive) ──────
+        JLabel lblFecha     = crearLabel("Fecha");
+        JLabel lblCupon     = crearLabel("Nro Cupón");
+        JLabel lblNombre    = crearLabel("Nombre del Productor");
+        JLabel lblBruto     = crearLabel("Peso Bruto (kg)");
+        JLabel lblTara      = crearLabel("Tara (kg)");
+        JLabel lblDescuento = crearLabel("Descuento (%)");
+        JLabel lblRemito    = crearLabel("Nro Remito");
 
-        // Fila 1: Fecha | Nro Cupón
-        lp.add(lbl("Fecha", C1, y));
-        JTextField txtFecha = campo(lp, C1, y + 22, CW, FH);
+        // ── Campos ──────────────────────────────────────────
+        JTextField txtFecha = crearCampo();
         txtFecha.setEditable(false);
         txtFecha.setBackground(VERDE_CLARO);
         txtFecha.setText(java.time.LocalDate.now().toString());
 
-        lp.add(lbl("Nro Cupón", C2, y));
-        JTextField txtCupon = campo(lp, C2, y + 22, CW, FH);
+        JTextField txtCupon = crearCampo();
         txtCupon.setEditable(false);
         txtCupon.setBackground(VERDE_CLARO);
         txtCupon.setText(String.valueOf(contadorCupon[0]));
-        y += RH;
 
-        // Fila 2: Nombre del Productor (fila completa)
-        lp.add(lbl("Nombre del Productor", C1, y));
         cmbNombre = new JComboBox<>();
         cmbNombre.setEditable(true);
         cmbNombre.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        cmbNombre.setBounds(C1, y + 22, C2 + CW - C1, FH); // ancho completo de la fila
         cmbNombre.setBackground(Color.WHITE);
-        lp.add(cmbNombre);
-
-        // Cuando se selecciona un productor registrado, guarda su Id internamente
         cmbNombre.addActionListener(e -> {
             if ("comboBoxChanged".equals(e.getActionCommand())) {
                 Object sel = cmbNombre.getSelectedItem();
                 String nro = sel != null ? mapaProductores.get(sel.toString()) : null;
-                selectedProductorNro = nro != null ? nro : "";
+                selectedProductorNro = nro != null ? Integer.parseInt(nro) : null;
             }
         });
-        y += RH;
 
-        // Fila 3: Peso Bruto | Tara
-        lp.add(lbl("Peso Bruto (kg)", C1, y));
-        JTextField txtBruto = campo(lp, C1, y + 22, CW, FH);
+        JTextField txtBruto     = crearCampo();
+        JTextField txtTara      = crearCampo();
 
-        lp.add(lbl("Tara (kg)", C2, y));
-        JTextField txtTara = campo(lp, C2, y + 22, CW, FH);
-        y += RH;
-
-        // Fila 4: Descuento | Remito
-        lp.add(lbl("Descuento (%)", C1, y));
-        JTextField txtDescuento = campo(lp, C1, y + 22, 130, FH);
+        JTextField txtDescuento = crearCampo();
         txtDescuento.setText("0");
         txtDescuento.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent e) {
@@ -160,19 +154,15 @@ public class BalanzaUI extends JFrame {
             }
         });
 
-        lp.add(lbl("Nro Remito", C2, y));
-        JTextField txtRemito = campo(lp, C2, y + 22, CW, FH);
-        y += RH;
+        JTextField txtRemito = crearCampo();
 
-        // ── Panel de cálculo ────────────────────────────
+        // ── Panel de cálculo ────────────────────────────────
         JPanel calcPanel = new JPanel(null);
         calcPanel.setBackground(VERDE_CLARO);
         calcPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(VERDE_MEDIO, 2),
                 BorderFactory.createEmptyBorder(8, 14, 8, 14)
         ));
-        calcPanel.setBounds(C1, y, 625, 100);
-        lp.add(calcPanel);
 
         JLabel lCalcTit = lbl("Cálculo en tiempo real", 0, 6);
         calcPanel.add(lCalcTit);
@@ -199,18 +189,80 @@ public class BalanzaUI extends JFrame {
         txtTara.getDocument().addDocumentListener(dl);
         txtDescuento.getDocument().addDocumentListener(dl);
 
-        y += 112;
-
-        // ── Botones ─────────────────────────────────────
+        // ── Botones ─────────────────────────────────────────
         JButton btnGuardar     = btn("Guardar",     VERDE_MEDIO,            Color.WHITE);
         JButton btnProductores = btn("Productores", VERDE_OSCURO,           Color.WHITE);
         JButton btnSalir       = btn("Salir",       new Color(155, 50, 50), Color.WHITE);
-        btnGuardar.setBounds(C1,  y, 180, 38);
-        btnProductores.setBounds(205, y, 180, 38);
-        btnSalir.setBounds(395,   y, 140, 38);
+
+        // ── Agregar al panel (bounds los asigna el Runnable de layout) ──
+        lp.add(lblFecha);     lp.add(txtFecha);
+        lp.add(lblCupon);     lp.add(txtCupon);
+        lp.add(lblNombre);    lp.add(cmbNombre);
+        lp.add(lblBruto);     lp.add(txtBruto);
+        lp.add(lblTara);      lp.add(txtTara);
+        lp.add(lblDescuento); lp.add(txtDescuento);
+        lp.add(lblRemito);    lp.add(txtRemito);
+        lp.add(calcPanel);
         lp.add(btnGuardar);
         lp.add(btnProductores);
         lp.add(btnSalir);
+
+        // ── Layout responsive ────────────────────────────────
+        // col2 (ancho >= 520): Fecha|Cupón en misma fila, Bruto|Tara, Descuento|Remito
+        // col1 (ancho <  520): todos los campos apilados verticalmente
+        Runnable aplicarLayout = () -> {
+            int w = formScroll.getViewport().getWidth();
+            if (w == 0) return;
+            boolean col2 = w >= 520;
+            int mg = 15;
+            int fw = w - mg * 2;
+            int yl = 12;
+
+            if (col2) {
+                // ── 2 columnas ──────────────────────────────
+                lblFecha.setBounds(C1, yl, 200, 18);     txtFecha.setBounds(C1, yl+22, CW, FH);
+                lblCupon.setBounds(C2, yl, 200, 18);     txtCupon.setBounds(C2, yl+22, CW, FH);
+                yl += RH;
+                lblNombre.setBounds(C1, yl, 300, 18);    cmbNombre.setBounds(C1, yl+22, C2+CW-C1, FH);
+                yl += RH;
+                lblBruto.setBounds(C1, yl, 200, 18);     txtBruto.setBounds(C1, yl+22, CW, FH);
+                lblTara.setBounds(C2, yl, 200, 18);      txtTara.setBounds(C2, yl+22, CW, FH);
+                yl += RH;
+                lblDescuento.setBounds(C1, yl, 200, 18); txtDescuento.setBounds(C1, yl+22, 130, FH);
+                lblRemito.setBounds(C2, yl, 200, 18);    txtRemito.setBounds(C2, yl+22, CW, FH);
+                yl += RH;
+                calcPanel.setBounds(C1, yl, Math.min(fw, 625), 100); yl += 112;
+                btnGuardar.setBounds(C1, yl, 180, 38);
+                btnProductores.setBounds(205, yl, 180, 38);
+                btnSalir.setBounds(395, yl, 140, 38);
+            } else {
+                // ── 1 columna ───────────────────────────────
+                lblFecha.setBounds(mg, yl, fw, 18);     txtFecha.setBounds(mg, yl+22, fw, FH);     yl += RH;
+                lblCupon.setBounds(mg, yl, fw, 18);     txtCupon.setBounds(mg, yl+22, fw, FH);     yl += RH;
+                lblNombre.setBounds(mg, yl, fw, 18);    cmbNombre.setBounds(mg, yl+22, fw, FH);    yl += RH;
+                lblBruto.setBounds(mg, yl, fw, 18);     txtBruto.setBounds(mg, yl+22, fw, FH);     yl += RH;
+                lblTara.setBounds(mg, yl, fw, 18);      txtTara.setBounds(mg, yl+22, fw, FH);      yl += RH;
+                lblDescuento.setBounds(mg, yl, fw, 18); txtDescuento.setBounds(mg, yl+22, 130, FH); yl += RH;
+                lblRemito.setBounds(mg, yl, fw, 18);    txtRemito.setBounds(mg, yl+22, fw, FH);    yl += RH;
+                calcPanel.setBounds(mg, yl, fw, 100); yl += 112;
+                int bw = (fw - 8) / 3;
+                btnGuardar.setBounds(mg, yl, bw, 38);
+                btnProductores.setBounds(mg + bw + 4, yl, bw, 38);
+                btnSalir.setBounds(mg + (bw + 4) * 2, yl, fw - (bw + 4) * 2, 38);
+            }
+
+            form.setPreferredSize(new Dimension(w, yl + 50));
+            form.revalidate();
+            formScroll.revalidate();
+            form.repaint();
+        };
+
+        formScroll.getViewport().addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override public void componentResized(java.awt.event.ComponentEvent e) {
+                aplicarLayout.run();
+            }
+        });
+        SwingUtilities.invokeLater(aplicarLayout);
 
         // ═══════════════════════════════════════════════════
         //  PANEL DERECHO  (tabla de registros)
@@ -368,7 +420,7 @@ public class BalanzaUI extends JFrame {
                 contadorCupon[0]++;
                 txtCupon.setText(String.valueOf(contadorCupon[0]));
                 txtFecha.setText(java.time.LocalDate.now().toString());
-                selectedProductorNro = "";
+                selectedProductorNro = null;
                 resetCombo();
                 limpiarCampo(txtBruto, txtTara, txtRemito);
                 txtDescuento.setText("0");
@@ -395,8 +447,22 @@ public class BalanzaUI extends JFrame {
             }
         });
 
-        add(left);
-        add(right);
+        // Con layout responsive el panel izq puede ser mucho más angosto
+        left.setMinimumSize(new Dimension(300, 400));
+        right.setMinimumSize(new Dimension(250, 400));
+
+        // JSplitPane con divisor verde — sin tocar el UI para preservar el drag
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, left, right);
+        split.setContinuousLayout(true);
+        split.setDividerSize(4);
+        split.setResizeWeight(0.55);
+        SwingUtilities.invokeLater(() -> {
+            if (split.getUI() instanceof javax.swing.plaf.basic.BasicSplitPaneUI) {
+                ((javax.swing.plaf.basic.BasicSplitPaneUI) split.getUI())
+                        .getDivider().setBackground(BORDE_CAMPO);
+            }
+        });
+        add(split, BorderLayout.CENTER);
 
         cargarRegistros();
         recargarCombo();
@@ -409,7 +475,7 @@ public class BalanzaUI extends JFrame {
     private void cargarRegistros() {
         tableModel.setRowCount(0);
         registrosActuales.clear();
-        for (Producto p : RegistroDAO.listar()) {
+        for (Registro p : RegistroDAO.listar()) {
             registrosActuales.add(p);
             tableModel.addRow(new Object[]{
                 p.getFecha(), p.getNroCupon(), p.getNroProductor(), p.getNombre(),
@@ -456,7 +522,7 @@ public class BalanzaUI extends JFrame {
 
     private void abrirDialogoEditar(int mRow) {
         if (mRow < 0 || mRow >= registrosActuales.size()) return;
-        Producto p = registrosActuales.get(mRow);
+        Registro p = registrosActuales.get(mRow);
 
         JDialog dlg = new JDialog(this, "Editar — Cupón " + p.getNroCupon(), true);
         dlg.setSize(400, 510);
@@ -510,8 +576,9 @@ public class BalanzaUI extends JFrame {
             if (nombre.isEmpty()) { msg("El Nombre no puede estar vacío."); return; }
 
             // Si el nombre coincide con un productor registrado, se usa su Id como Nro_Productor
-            // (consistencia automática; si es libre queda "")
-            String nroProd = mapaProductores.getOrDefault(nombre, "");
+            // (consistencia automática; si es libre queda null)
+            String nroStr = mapaProductores.get(nombre);
+            Integer nroProd = nroStr != null ? Integer.parseInt(nroStr) : null;
 
             try {
                 double br = Double.parseDouble(tBruto.getText().replace(",", "."));
@@ -531,7 +598,7 @@ public class BalanzaUI extends JFrame {
 
     private void abrirVistaPrevia(int mRow) {
         if (mRow < 0 || mRow >= registrosActuales.size()) return;
-        Producto p = registrosActuales.get(mRow);
+        Registro p = registrosActuales.get(mRow);
 
         JDialog dlg = new JDialog(this, "Vista previa — Recibo de Pesada", true);
         dlg.setSize(380, 580);
@@ -689,7 +756,7 @@ public class BalanzaUI extends JFrame {
 
     private void eliminarRegistro(int mRow) {
         if (mRow < 0 || mRow >= registrosActuales.size()) return;
-        Producto p = registrosActuales.get(mRow);
+        Registro p = registrosActuales.get(mRow);
         if (JOptionPane.showConfirmDialog(this,
                 "¿Eliminar cupón " + p.getNroCupon() + " de " + p.getNombre() + "?",
                 "Confirmar eliminación", JOptionPane.YES_NO_OPTION,
