@@ -215,10 +215,10 @@ public class BalanzaUI extends JFrame {
         // Tabla
         String[] cols = {
             "Fecha","Cupón","N° Prod","Nombre",
-            "Bruto (kg)","Tara (kg)","Desc %","Neto (kg)","Remito"," ","  "
+            "Bruto (kg)","Tara (kg)","Desc %","Neto (kg)","Remito"," ","  ","   "
         };
         tableModel = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return c == 9 || c == 10; }
+            @Override public boolean isCellEditable(int r, int c) { return c == 9 || c == 10 || c == 11; }
         };
 
         tabla = new JTable(tableModel);
@@ -285,25 +285,31 @@ public class BalanzaUI extends JFrame {
             }
         });
 
-        int[] anchos = {88, 52, 65, 115, 75, 70, 55, 80, 65, 70, 75};
+        int[] anchos = {88, 52, 65, 115, 75, 70, 55, 80, 65, 70, 75, 70};
         for (int i = 0; i < anchos.length; i++)
             tabla.getColumnModel().getColumn(i).setPreferredWidth(anchos[i]);
 
-        Color cEdit = new Color(79, 119, 45);
-        Color cDel  = new Color(180, 60, 60);
-        tabla.getColumnModel().getColumn(9).setCellRenderer(new BtnRenderer("Editar",   cEdit, iconoEditar()));
-        tabla.getColumnModel().getColumn(10).setCellRenderer(new BtnRenderer("Eliminar", cDel,  iconoEliminar()));
+        Color cEdit  = new Color(79, 119, 45);
+        Color cDel   = new Color(180, 60, 60);
+        Color cPrint = new Color(60, 100, 160);
 
-        JButton bEdit = btnCelda("Editar",   cEdit);
-        bEdit.setIcon(iconoEditar());
-        bEdit.setHorizontalTextPosition(SwingConstants.RIGHT);
-        bEdit.setIconTextGap(4);
-        JButton bDel  = btnCelda("Eliminar", cDel);
-        bDel.setIcon(iconoEliminar());
-        bDel.setHorizontalTextPosition(SwingConstants.RIGHT);
-        bDel.setIconTextGap(4);
-        tabla.getColumnModel().getColumn(9).setCellEditor(new BtnEditor(bEdit, mRow -> abrirDialogoEditar(mRow)));
-        tabla.getColumnModel().getColumn(10).setCellEditor(new BtnEditor(bDel,  mRow -> eliminarRegistro(mRow)));
+        tabla.getColumnModel().getColumn(9).setCellRenderer(new BtnRenderer("Editar",   cEdit,  iconoEditar()));
+        tabla.getColumnModel().getColumn(10).setCellRenderer(new BtnRenderer("Eliminar", cDel,   iconoEliminar()));
+        tabla.getColumnModel().getColumn(11).setCellRenderer(new BtnRenderer("Recibo",   cPrint, iconoImprimir()));
+
+        JButton bEdit  = btnCelda("Editar",   cEdit);
+        bEdit.setIcon(iconoEditar());   bEdit.setHorizontalTextPosition(SwingConstants.RIGHT); bEdit.setIconTextGap(4);
+        JButton bDel   = btnCelda("Eliminar", cDel);
+        bDel.setIcon(iconoEliminar());  bDel.setHorizontalTextPosition(SwingConstants.RIGHT);  bDel.setIconTextGap(4);
+        JButton bPrint = btnCelda("Recibo",   cPrint);
+        bPrint.setIcon(iconoImprimir()); bPrint.setHorizontalTextPosition(SwingConstants.RIGHT); bPrint.setIconTextGap(4);
+
+        tabla.getColumnModel().getColumn(9).setCellEditor( new BtnEditor(bEdit,  mRow -> abrirDialogoEditar(mRow)));
+        tabla.getColumnModel().getColumn(10).setCellEditor(new BtnEditor(bDel,   mRow -> eliminarRegistro(mRow)));
+        tabla.getColumnModel().getColumn(11).setCellEditor(new BtnEditor(bPrint, mRow -> abrirVistaPrevia(mRow)));
+
+        // Columna 11 no ordenable
+        ((TableRowSorter<?>) tabla.getRowSorter()).setSortable(11, false);
 
         JScrollPane scroll = new JScrollPane(tabla);
         scroll.getViewport().setBackground(Color.WHITE);
@@ -393,7 +399,7 @@ public class BalanzaUI extends JFrame {
             tableModel.addRow(new Object[]{
                 p.getFecha(), p.getNroCupon(), p.getNroProductor(), p.getNombre(),
                 p.getPesoBruto(), p.getTara(), p.getDescuento(), p.getPesoNeto(),
-                p.getRemito(), "Editar", "Eliminar"
+                p.getRemito(), "Editar", "Eliminar", "Recibo"
             });
         }
     }
@@ -506,6 +512,164 @@ public class BalanzaUI extends JFrame {
         });
 
         dlg.setVisible(true);
+    }
+
+    private void abrirVistaPrevia(int mRow) {
+        if (mRow < 0 || mRow >= registrosActuales.size()) return;
+        Producto p = registrosActuales.get(mRow);
+
+        JDialog dlg = new JDialog(this, "Vista previa — Recibo de Pesada", true);
+        dlg.setSize(380, 580);
+        dlg.setResizable(false);
+        dlg.setLocationRelativeTo(this);
+        dlg.setLayout(new BorderLayout());
+        dlg.getContentPane().setBackground(new Color(230, 230, 230));
+
+        // ── Panel del recibo (blanco, estilo ticket) ──────
+        JPanel recibo = new JPanel(null);
+        recibo.setBackground(Color.WHITE);
+        recibo.setPreferredSize(new Dimension(340, 500));
+        recibo.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(0, 0, 0, 0)
+        ));
+
+        int ry = 18;
+
+        // Logo / Empresa
+        JLabel lEmpresa = new JLabel("YERBATERA C&M", JLabel.CENTER);
+        lEmpresa.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lEmpresa.setForeground(VERDE_OSCURO);
+        lEmpresa.setBounds(0, ry, 340, 26); recibo.add(lEmpresa); ry += 28;
+
+        JLabel lSistema = new JLabel("Sistema de Balanza", JLabel.CENTER);
+        lSistema.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lSistema.setForeground(Color.GRAY);
+        lSistema.setBounds(0, ry, 340, 16); recibo.add(lSistema); ry += 22;
+
+        ry = sep(recibo, ry);
+
+        JLabel lTitulo = new JLabel("RECIBO DE PESADA", JLabel.CENTER);
+        lTitulo.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lTitulo.setForeground(TEXTO_OSCURO);
+        lTitulo.setBounds(0, ry, 340, 20); recibo.add(lTitulo); ry += 26;
+
+        ry = filaRecibo(recibo, ry, "Cupón N°:",  String.format("%04d", p.getNroCupon()));
+        ry = filaRecibo(recibo, ry, "Fecha:",      p.getFecha());
+        ry = filaRecibo(recibo, ry, "Remito N°:",  String.valueOf(p.getRemito()));
+
+        ry = sep(recibo, ry);
+
+        JLabel lProd = new JLabel("PRODUCTOR", JLabel.LEFT);
+        lProd.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lProd.setForeground(VERDE_OSCURO);
+        lProd.setBounds(20, ry, 300, 16); recibo.add(lProd); ry += 20;
+
+        ry = filaRecibo(recibo, ry, "Nombre:", p.getNombre());
+
+        ry = sep(recibo, ry);
+
+        JLabel lDet = new JLabel("DETALLE DE PESADA", JLabel.LEFT);
+        lDet.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lDet.setForeground(VERDE_OSCURO);
+        lDet.setBounds(20, ry, 300, 16); recibo.add(lDet); ry += 20;
+
+        ry = filaRecibo(recibo, ry, "Peso Bruto:",  String.format("%.2f kg", p.getPesoBruto()));
+        ry = filaRecibo(recibo, ry, "Tara:",         String.format("%.2f kg", p.getTara()));
+        ry = filaRecibo(recibo, ry, "Descuento:",    String.format("%.1f %%",  p.getDescuento()));
+
+        // Línea divisoria antes del neto
+        JSeparator sepNeto = new JSeparator();
+        sepNeto.setForeground(VERDE_MEDIO);
+        sepNeto.setBounds(20, ry + 2, 300, 2); recibo.add(sepNeto); ry += 12;
+
+        JLabel lNetoLbl = new JLabel("Peso Neto:");
+        lNetoLbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lNetoLbl.setForeground(VERDE_OSCURO);
+        lNetoLbl.setBounds(20, ry, 160, 22); recibo.add(lNetoLbl);
+        JLabel lNetoVal = new JLabel(String.format("%.2f kg", p.getPesoNeto()), JLabel.RIGHT);
+        lNetoVal.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lNetoVal.setForeground(VERDE_OSCURO);
+        lNetoVal.setBounds(160, ry, 160, 22); recibo.add(lNetoVal); ry += 30;
+
+        ry = sep(recibo, ry);
+
+        // Firma
+        JLabel lFirma = new JLabel("Firma: _________________________");
+        lFirma.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lFirma.setForeground(Color.GRAY);
+        lFirma.setBounds(20, ry, 300, 18); recibo.add(lFirma); ry += 30;
+
+        // Ajustar altura del panel al contenido
+        recibo.setPreferredSize(new Dimension(340, ry + 10));
+
+        // ── Scroll por si el contenido es largo ──────────
+        JScrollPane sp = new JScrollPane(recibo);
+        sp.setBorder(BorderFactory.createEmptyBorder(12, 20, 8, 20));
+        sp.getViewport().setBackground(new Color(230, 230, 230));
+        sp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        dlg.add(sp, BorderLayout.CENTER);
+
+        // ── Botones ───────────────────────────────────────
+        JPanel panelBtn = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 10));
+        panelBtn.setBackground(new Color(230, 230, 230));
+
+        JButton btnImprimir = btn("Imprimir", VERDE_OSCURO, Color.WHITE);
+        btnImprimir.setIcon(iconoImprimir());
+        btnImprimir.setHorizontalTextPosition(SwingConstants.RIGHT);
+        btnImprimir.setIconTextGap(6);
+        JButton btnCerrar = btn("Cerrar", new Color(120, 120, 120), Color.WHITE);
+
+        panelBtn.add(btnImprimir);
+        panelBtn.add(btnCerrar);
+        dlg.add(panelBtn, BorderLayout.SOUTH);
+
+        btnCerrar.addActionListener(e -> dlg.dispose());
+        btnImprimir.addActionListener(e -> {
+            java.awt.print.PrinterJob job = java.awt.print.PrinterJob.getPrinterJob();
+            job.setPrintable((g, pf, pi) -> {
+                if (pi > 0) return java.awt.print.Printable.NO_SUCH_PAGE;
+                Graphics2D g2 = (Graphics2D) g;
+                g2.translate(pf.getImageableX(), pf.getImageableY());
+                // Escalar el recibo para que entre en la hoja
+                double scaleX = pf.getImageableWidth()  / recibo.getWidth();
+                double scaleY = pf.getImageableHeight() / recibo.getHeight();
+                double scale  = Math.min(scaleX, scaleY);
+                g2.scale(scale, scale);
+                recibo.print(g2);
+                return java.awt.print.Printable.PAGE_EXISTS;
+            });
+            if (job.printDialog()) {
+                try { job.print(); }
+                catch (java.awt.print.PrinterException ex) { msg("Error al imprimir: " + ex.getMessage()); }
+            }
+        });
+
+        dlg.setVisible(true);
+    }
+
+    /** Fila clave–valor dentro del recibo */
+    private int filaRecibo(JPanel p, int y, String clave, String valor) {
+        JLabel lClave = new JLabel(clave);
+        lClave.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lClave.setForeground(new Color(80, 80, 80));
+        lClave.setBounds(20, y, 150, 18);
+        p.add(lClave);
+        JLabel lValor = new JLabel(valor, JLabel.RIGHT);
+        lValor.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lValor.setForeground(TEXTO_OSCURO);
+        lValor.setBounds(160, y, 160, 18);
+        p.add(lValor);
+        return y + 22;
+    }
+
+    /** Separador horizontal dentro del recibo */
+    private int sep(JPanel p, int y) {
+        JSeparator s = new JSeparator();
+        s.setForeground(new Color(220, 220, 220));
+        s.setBounds(20, y + 4, 300, 1);
+        p.add(s);
+        return y + 14;
     }
 
     private void eliminarRegistro(int mRow) {
@@ -667,6 +831,22 @@ public class BalanzaUI extends JFrame {
             g.setStroke(new BasicStroke(1.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g.drawLine(1, 14, 3, 12);
             g.drawLine(1, 14, 5, 14);
+        }));
+    }
+
+    /** Impresora blanca — cuerpo + papel saliendo */
+    static ImageIcon iconoImprimir() {
+        return new ImageIcon(mkImg(15, 15, g -> {
+            g.setColor(Color.WHITE);
+            g.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            // Cuerpo de la impresora
+            g.drawRoundRect(1, 5, 13, 7, 2, 2);
+            // Papel entrando (arriba)
+            g.drawRect(4, 2, 7, 4);
+            // Papel saliendo (abajo)
+            g.setStroke(new BasicStroke(1.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.drawRect(4, 10, 7, 4);
+            g.drawLine(6, 12, 10, 12);  // línea de texto simulada
         }));
     }
 
